@@ -1,7 +1,17 @@
-import Routes from './routes';
+import RoutesApp from './routes';
+import { BrowserRouter } from 'react-router-dom';
+
+import GlobalStyle from './styles/global';
 function App() {
   return (
-    <Routes />
+    <>
+      <GlobalStyle/>
+      <BrowserRouter>
+          <RoutesApp/>
+      </BrowserRouter>
+    </>
+    
+    
   );
 }
 
