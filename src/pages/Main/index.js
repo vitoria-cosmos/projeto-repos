@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 
 import { FaGithub, FaPlus, FaSpinner, FaBars, FaTrash } from 'react-icons/fa';
 
@@ -12,9 +12,28 @@ export default function Main() {
     const [newRepo, setNewRepo] = useState('');
     const [repositorios, setRepositorios] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [alert, setAlert] = useState(null);
+
+    // Buscar
+    useEffect(() => {
+        const repoStorage = localStorage.getItem('repos');
+
+        if(repoStorage) {
+            setRepositorios(JSON.parse(repoStorage));
+        }
+    }, [])
+
+    // Salvar alterações
+    useEffect(() => {
+        localStorage.setItem('repos', JSON.stringify(repositorios));
+
+
+        // quando a variável repositorios sofrer alterações, vamos executar o código de cima
+    }, [repositorios]);
 
     function handleinputChange(e) {
         setNewRepo(e.target.value);
+        setAlert(null);
 
         
 
@@ -22,11 +41,24 @@ export default function Main() {
 
     const handleSubmit = useCallback((e) => {
         e.preventDefault();
+        setAlert(null);
      
         async function submit() {
             setLoading(true);
             try {
-                const response = await api.get(`repos/${newRepo}`)
+
+                // no try catch podemos jogar um erro
+                if (newRepo === '') {
+                    throw new Error('Você precisa indicar um repositório!');
+                }
+                const response = await api.get(`repos/${newRepo}`);
+
+                // verifica se a pessoa quer adicionar um repositório que já existe
+                const hasRepo = repositorios.find(repo => repo.name === newRepo);
+
+                if(hasRepo) {
+                    throw new Error('Repositório Duplicado');
+                }
                 const data = {
                     name: response.data.full_name,
                 }
@@ -35,6 +67,7 @@ export default function Main() {
                 console.log('repositorios: ', repositorios)
                 setNewRepo('');
             } catch (error) {
+                setAlert(true);
                 console.log(error);
             } finally {
                 // aqui já deu tudo certo, já acabou
@@ -61,7 +94,7 @@ export default function Main() {
                 Meus Repositórios
             </h1>
 
-            <Form onSubmit={handleSubmit}>
+            <Form onSubmit={handleSubmit} error={alert}>
                 <input 
                 type='text'
                 placeholder='Adicionar Repositório'

@@ -33,7 +33,7 @@ export const Form = styled.form`
     /* o input vai pegar toda a largura da nossa tela */
     input {
         flex: 1;
-        border: 1px solid #ddd;
+        border: 1px solid ${props => (props.error ? '#ff0000' : '#ddd')};
         padding: 10px 15px;
         border-radius: 4px;
         font-size: 17px;
